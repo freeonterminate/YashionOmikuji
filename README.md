@@ -20,11 +20,43 @@
 <script src="assets/omikuji.js"></script>
 ```
 
+おみくじを引くと、結果の下に `本日の開運記事はこちら` として [Yashion の RSS](https://yashion.jp/feed/) からランダムな記事を1件表示します。RSS はウィジェット読込時にすぐ先読みします。以前は idle 待ちと直列フォールバックで遅くなっていましたが、現在は先読みを即開始し、cross-origin 時の取得待ちも短くなるように調整しています。
+
+引く前は `assets/omikuji-images/title.png` を表示し、記事エリアの見出しは `おみくじを引くと開運記事が読めるよ` になります。
+
+## 回数制限
+
+おみくじの回数は `localStorage` と Cookie に保存し、その日は一度だけ引けます。
+表示された開運記事を開くと、その場でもう一度引けるようになります。
+
+画面には次の注意書きが表示されます。
+
+- `おみくじは一日一回ひけるよ！`
+- `…本当はヒミツなんだけど、開運記事を読むとまた引けるよ！`
+
+## デバッグ
+
+Cookie と `localStorage` の回数制限を消すデバッグボタンは、通常は表示されません。
+必要なときだけ次のどちらかで有効にできます。
+
+```html
+<div data-omikuji data-omikuji-debug="true"></div>
+```
+
+```html
+<script>
+  OmikujiWidget.mount("#fortune-box", {
+    debug: true
+  });
+</script>
+```
+
 ## PNG の置き方
 
 デフォルトでは `assets/omikuji-images` フォルダを見に行きます。
-以下の5ファイル名で PNG を置くと、結果に応じて自動表示されます。日本語ファイル名は使いません。
+以下のファイル名で PNG を置くと、自動表示されます。日本語ファイル名は使いません。
 
+- `title.png`
 - `daikichi.png`
 - `chukichi.png`
 - `kichi.png`
@@ -43,7 +75,7 @@
     title: "本日の開運くじ",
     description: "運勢とひとことを表示します。",
     buttonLabel: "今日の運勢を見る",
-    hint: "画像はあとで差し替えできます。"
+    hint: ""
   });
 </script>
 ```
@@ -58,7 +90,16 @@
 </script>
 ```
 
-この場合もファイル名は `daikichi.png` などの英語名で判定します。
+この場合もファイル名は `title.png` や `daikichi.png` などの英語名で判定します。
+
+RSS URL を変える場合:
+
+```html
+<script>
+  OmikujiWidget.mount("#fortune-box", {
+    feedUrl: "https://example.com/feed/"
+  });
+</script>
+```
 
 結果は `大吉 / 中吉 / 吉 / 凶 / 大凶` の5種類です。文言は各10件、合計50件を内蔵しています。
-
