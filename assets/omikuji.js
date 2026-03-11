@@ -433,7 +433,7 @@
       '<p class="omikuji-widget__article-summary">' + escapeHtml(options.preArticleSummary) + '</p>' +
       '</section>' +
       '<p class="omikuji-widget__hint">' + escapeHtml(options.hint) + '</p>' +
-      '<p class="omikuji-widget__footer"><a class="omikuji-widget__footer-link" href="https://yashion.jp" target="_blank" rel="noopener noreferrer">????????</a></p>' +
+      '<p class="omikuji-widget__footer"><a class="omikuji-widget__footer-link" href="https://yashion.jp" target="_blank" rel="noopener noreferrer">やしおんトップへ</a></p>' +
       '</section>'
     );
   }
@@ -655,10 +655,10 @@
       saveDrawState(state);
       updateDrawControls(button, status, settings);
 
-      if (articleMeta.textContent.indexOf('????????') === -1) {
+      if (articleMeta.textContent.indexOf('もう一度引けます') === -1) {
         articleMeta.textContent = articleMeta.textContent
-          ? articleMeta.textContent + ' / ??????????????????'
-          : '??????????????????';
+          ? articleMeta.textContent + ' / 記事を読んだので、もう一度引けます。'
+          : '記事を読んだので、もう一度引けます。';
       }
     });
 
@@ -673,8 +673,8 @@
       currentState = saveDrawState(currentState);
 
       button.disabled = true;
-      button.textContent = '???...';
-      status.textContent = '???????????';
+      button.textContent = '占い中...';
+      status.textContent = '結果を準備しています。';
 
       ensureMessages().then(function (messages) {
         window.setTimeout(function () {
@@ -690,8 +690,8 @@
             image,
             fortune.image,
             fortune.fallbackImage,
-            fortune.luck + ' ???',
-            fortune.luck + ' ??????????'
+            fortune.luck + ' の画像',
+            fortune.luck + ' のプレースホルダ画像'
           );
 
           if (!prefetchedArticles && !feedError) {
