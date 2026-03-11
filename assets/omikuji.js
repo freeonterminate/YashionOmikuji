@@ -554,8 +554,8 @@
       image,
       buildTitleImagePath(options),
       createTitlePlaceholderSvg(),
-      'おみくじタイトル画像',
-      'おみくじタイトルのプレースホルダ画像'
+      '\u304a\u307f\u304f\u3058\u30bf\u30a4\u30c8\u30eb\u753b\u50cf',
+      '\u304a\u307f\u304f\u3058\u30bf\u30a4\u30c8\u30eb\u306e\u30d7\u30ec\u30fc\u30b9\u30db\u30eb\u30c0\u753b\u50cf'
     );
 
     articleBox.dataset.state = 'idle';
@@ -564,6 +564,31 @@
     articleLink.removeAttribute('href');
     articleMeta.textContent = '';
     articleSummary.textContent = options.preArticleSummary;
+  }
+
+  function renderFortuneResult(result, badge, image, message, fortune) {
+    result.dataset.state = 'drawn';
+    result.dataset.luck = fortune.luck;
+    badge.textContent = fortune.luck;
+    message.textContent = fortune.message;
+
+    setImageSource(
+      image,
+      fortune.image,
+      fortune.fallbackImage || createFortunePlaceholderSvg(fortune.luck),
+      fortune.luck + ' \u306e\u753b\u50cf',
+      fortune.luck + ' \u306e\u30d7\u30ec\u30fc\u30b9\u30db\u30eb\u30c0\u753b\u50cf'
+    );
+  }
+
+  function restoreSavedDisplay(state, result, badge, image, message, articleBox, articleEyebrow, articleLink, articleMeta, articleSummary, options) {
+    if (!state || !state.fortune) {
+      renderInitialState(result, badge, image, message, articleBox, articleEyebrow, articleLink, articleMeta, articleSummary, options);
+      return;
+    }
+
+    renderFortuneResult(result, badge, image, message, state.fortune);
+    renderArticle(articleBox, articleEyebrow, articleLink, articleMeta, articleSummary, state.article, options);
   }
 
   function updateDrawControls(button, status, options) {
