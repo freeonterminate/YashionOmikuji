@@ -1,65 +1,10 @@
 ﻿(function () {
-  var DEFAULT_MESSAGES = {
-    "大吉": [
-      "今日のあなたは追い風そのもの。迷っていた計画に一歩踏み出すと、想像以上に良い流れが生まれます。",
-      "努力が実を結ぶ日です。これまで積み重ねたことが、目に見える形で評価されるでしょう。",
-      "人とのご縁が大きな幸運を呼びます。気になっていた相手への連絡は吉です。",
-      "新しい挑戦に最適な運気です。少し背伸びした目標でも、今なら軽やかに届きます。",
-      "あなたの直感が冴えています。最初にピンと来た選択を信じると道が開けます。",
-      "うれしい知らせが届きやすい日です。特に仕事や学びに関する話は前向きに受け取りましょう。",
-      "金運も上々。欲しかったものは、今のあなたに必要な投資になる可能性があります。",
-      "笑顔が福を呼び込みます。いつもより明るい挨拶が、思わぬ幸運のきっかけになります。",
-      "停滞していたことが動き出します。焦らず流れに乗ることで、最善の形に整っていきます。",
-      "願いごとに追い風が吹いています。周囲の助けに感謝しながら進めば、大きな実りを得られます。"
-    ],
-    "中吉": [
-      "穏やかな上昇運です。派手さはなくても、着実にうれしい成果へ近づいています。",
-      "小さな親切が大きな福につながります。今日は誰かのためのひと手間を惜しまないで。",
-      "準備してきたことが役立つ日です。焦らず基本に忠実でいるほど運が味方します。",
-      "人と比べず自分の歩幅を守ると吉。あなたらしさが一番の魅力になります。",
-      "迷ったら無理のない方を選ぶと正解に近づきます。自然体が幸運の鍵です。",
-      "会話の中にヒントがあります。何気ない一言が、次の行動を後押ししてくれるでしょう。",
-      "今日は整える力が高まっています。机まわりや予定表を見直すと運気もすっきりします。",
-      "少し遠回りに見える道が、結果的にいちばん良い選択になります。",
-      "気が進まなかったことほど、やってみると収穫があります。最初の一歩だけ軽く踏み出しましょう。",
-      "安心できる人との時間が運を育てます。ひとりで抱え込まず、素直に話すと吉です。"
-    ],
-    "吉": [
-      "安定した運気です。大きく欲張るより、いつもの良さを丁寧に発揮するのが正解です。",
-      "今日は基本を見直すと流れが良くなります。派手な工夫より土台固めに福があります。",
-      "気持ちに余裕を持つことで、見落としていたチャンスに気づけそうです。",
-      "頼まれごとは吉。できる範囲で応えると、巡り巡ってあなたの助けになります。",
-      "少しの工夫が日常を快適にします。気になっていた不便を一つ解消してみましょう。",
-      "落ち着いて言葉を選ぶと、人間関係がぐっとやわらかくなります。",
-      "目の前のことを一つずつ終えると吉。積み残しを減らすほど心も軽くなります。",
-      "運気は穏やかですが、油断は禁物です。丁寧さを忘れなければ十分に良い一日になります。",
-      "買い物や選択は、即決より比較が吉。ひと呼吸おくことで納得できる答えが見つかります。",
-      "休むことも大事な開運行動です。今日は体と心のペースを揃えて過ごしてみてください。"
-    ],
-    "凶": [
-      "急ぎすぎに注意。今日は結論を早めるより、一度立ち止まることで失敗を避けられます。",
-      "思い通りに進みにくい日ですが、今は整える時期と考えると流れが変わります。",
-      "無理な約束は避けた方が吉。余白を残すことで、あとから助かる場面がありそうです。",
-      "感情的な反応は損をしやすい日です。返事をする前に深呼吸を一つ。",
-      "小さな見落としが起こりやすいので、確認をいつもの二倍丁寧にすると安心です。",
-      "対人運は慎重さが鍵です。正しさより思いやりを優先すると穏やかに収まります。",
-      "今は攻めるより守る方が得策です。現状維持をしっかりこなせば十分に吉へ転じます。",
-      "疲れが判断を鈍らせるかもしれません。早めの休息が今日いちばんの開運法です。",
-      "欲張ると空回りしやすい日です。一つに絞って取り組むと傷が浅くて済みます。",
-      "焦りは禁物。今日の遠回りは、明日の失敗を防ぐために必要な時間です。"
-    ],
-    "大凶": [
-      "運気は低空飛行ですが、慎重に動けば大事には至りません。今日は守りを最優先に。",
-      "思わぬ行き違いが起こりやすい日です。大切な話ほど文字や記録で残しておくと安心です。",
-      "無理に流れを変えようとすると疲れが増します。今日は現状維持だけでも十分合格です。",
-      "決断は明日に回せるなら延期が無難。今日は情報収集と整理に向いています。",
-      "ひとりで抱え込むと視野が狭くなりそうです。信頼できる人の意見を借りてください。",
-      "落ち込みやすい日ですが、悪い流れは長く続きません。丁寧な暮らしが回復の近道です。",
-      "忘れ物や勘違いに要注意。出発前、送信前、提出前の三回確認が身を守ります。",
-      "今日は勝負をかける日ではありません。静かに足元を固めることで、次の好機を迎えられます。",
-      "うまくいかない時こそ、自分を責めすぎないことが大切です。小さく整えれば十分です。",
-      "厳しい運勢でも、回避できる不運は多くあります。慎重さと休息が今日の最強のお守りです。"
-    ]
+  var FALLBACK_MESSAGES = {
+    "大吉": ["今日は運気が高まっています。前向きに進むと吉です。"],
+    "中吉": ["落ち着いた流れの日です。丁寧に進めると良い結果につながります。"],
+    "吉": ["肩の力を抜いて過ごすと、穏やかな追い風を感じられます。"],
+    "凶": ["急がず慎重に進めば、今日は十分に乗り切れます。"],
+    "大凶": ["無理をせず整えることを優先すると、流れを立て直せます。"]
   };
 
   var DEFAULT_WEIGHTS = [
@@ -332,20 +277,70 @@
     return getRemainingDraws(state) > 0;
   }
 
-  function resolveFeedUrl(feedUrl) {
-    try {
-      return new URL(feedUrl, window.location.href).toString();
-    } catch (error) {
-      return feedUrl;
-    }
+  function restoreDraw(state) {
+    var nextState = state || loadDrawState();
+    nextState.drawCount = Math.max(0, nextState.drawCount - 1);
+    return saveDrawState(nextState);
   }
 
-  function getDefaultFeedUrl() {
-    if (window.location.hostname === 'yashion.jp' || /\\.yashion\\.jp$/i.test(window.location.hostname)) {
-      return '/feed/';
+  function createMessageGroups() {
+    return {
+      "大吉": [],
+      "中吉": [],
+      "吉": [],
+      "凶": [],
+      "大凶": []
+    };
+  }
+
+  function parseMessagesText(text) {
+    var groups = createMessageGroups();
+    var lines = String(text || '').split(/\r?\n/);
+
+    for (var i = 0; i < lines.length; i += 1) {
+      var line = lines[i].trim();
+      if (!line || line.charAt(0) === '#') {
+        continue;
+      }
+
+      var commaIndex = line.indexOf(',');
+      if (commaIndex === -1) {
+        continue;
+      }
+
+      var luck = line.slice(0, commaIndex).trim();
+      var message = line.slice(commaIndex + 1).trim();
+      if (!groups[luck] || !message) {
+        continue;
+      }
+
+      groups[luck].push(message);
     }
 
-    return 'https://yashion.jp/feed/';
+    return groups;
+  }
+
+  function hasEnoughMessages(groups) {
+    return !!(
+      groups &&
+      groups["大吉"] && groups["大吉"].length &&
+      groups["中吉"] && groups["中吉"].length &&
+      groups["吉"] && groups["吉"].length &&
+      groups["凶"] && groups["凶"].length &&
+      groups["大凶"] && groups["大凶"].length
+    );
+  }
+
+  function fetchMessagesText(url) {
+    return fetch(url, {
+      cache: 'no-store'
+    }).then(function (response) {
+      if (!response.ok) {
+        throw new Error('http_' + response.status);
+      }
+
+      return response.text();
+    });
   }
 
   function fetchFeedText(url) {
@@ -390,7 +385,7 @@
   }
 
   function fetchRemoteFeedItems(feedUrl) {
-    return fetchFeedText(resolveFeedUrl(feedUrl)).then(function (xmlText) {
+    return fetchFeedText(feedUrl).then(function (xmlText) {
       var items = parseFeedItems(xmlText, feedUrl);
       if (!items.length) {
         throw new Error('empty_feed');
@@ -438,6 +433,7 @@
       '<p class="omikuji-widget__article-summary">' + escapeHtml(options.preArticleSummary) + '</p>' +
       '</section>' +
       '<p class="omikuji-widget__hint">' + escapeHtml(options.hint) + '</p>' +
+      '<p class="omikuji-widget__footer"><a class="omikuji-widget__footer-link" href="https://yashion.jp" target="_blank" rel="noopener noreferrer">????????</a></p>' +
       '</section>'
     );
   }
@@ -453,10 +449,11 @@
       preArticleHeading: (options && options.preArticleHeading) || 'おみくじを引くと開運記事が読めるよ',
       preArticleSummary: (options && options.preArticleSummary) || '',
       debug: !!(options && options.debug),
-      feedUrl: (options && options.feedUrl) || getDefaultFeedUrl(),
+      feedUrl: (options && options.feedUrl) || 'https://yashion.jp/feed/',
       noticeLine1: (options && options.noticeLine1) || 'おみくじは一日一回ひけるよ！',
       noticeLine2: (options && options.noticeLine2) || '…本当はヒミツなんだけど、開運記事を読むとまた引けるよ！',
-      messages: (options && options.messages) || DEFAULT_MESSAGES,
+      messages: (options && options.messages) || null,
+      messageFile: (options && options.messageFile) || './assets/omikuji-messages.txt',
       weights: (options && options.weights) || DEFAULT_WEIGHTS,
       images: (options && options.images) || null,
       imageResolver: (options && options.imageResolver) || null,
@@ -473,14 +470,14 @@
     articleSummary.textContent = '';
   }
 
-  function renderArticle(articleBox, articleEyebrow, articleLink, articleMeta, articleSummary, article, feedUrl, options) {
+  function renderArticle(articleBox, articleEyebrow, articleLink, articleMeta, articleSummary, article, options) {
     articleBox.dataset.state = 'ready';
     articleEyebrow.textContent = options.articleHeading;
 
     if (!article) {
-      articleLink.textContent = 'やしおんの記事一覧を見る';
-      articleLink.href = feedUrl;
-      articleMeta.textContent = 'RSS から記事を取得できなかったため、一覧ページを開きます。';
+      articleLink.textContent = '';
+      articleLink.removeAttribute('href');
+      articleMeta.textContent = '開運記事の取得に失敗しちゃった…💦';
       articleSummary.textContent = '';
       return;
     }
@@ -568,9 +565,40 @@
     var articleSummary = root.querySelector('.omikuji-widget__article-summary');
     var articleRewardGranted = false;
     var debugEnabled = isDebugEnabled(root, settings);
+    var loadedMessages = settings.messages;
+    var messagesRequest = null;
     var prefetchedArticles = null;
     var feedError = null;
     var feedRequest = null;
+
+    function ensureMessages() {
+      if (loadedMessages && hasEnoughMessages(loadedMessages)) {
+        return Promise.resolve(loadedMessages);
+      }
+
+      if (messagesRequest) {
+        return messagesRequest;
+      }
+
+      messagesRequest = fetchMessagesText(settings.messageFile).then(function (messageText) {
+        var parsed = parseMessagesText(messageText);
+        if (!hasEnoughMessages(parsed)) {
+          throw new Error('invalid_messages');
+        }
+
+        loadedMessages = parsed;
+        return loadedMessages;
+      }).catch(function (error) {
+        if (window.console && typeof window.console.warn === 'function') {
+          window.console.warn('[OmikujiWidget] Message file fetch failed:', error);
+        }
+
+        loadedMessages = FALLBACK_MESSAGES;
+        return loadedMessages;
+      });
+
+      return messagesRequest;
+    }
 
     function ensureFeedItems(forceRetry) {
       if (prefetchedArticles && !forceRetry) {
@@ -596,6 +624,7 @@
       return feedRequest;
     }
 
+    ensureMessages();
     ensureFeedItems(false).catch(function () {
       return null;
     });
@@ -626,10 +655,10 @@
       saveDrawState(state);
       updateDrawControls(button, status, settings);
 
-      if (articleMeta.textContent.indexOf('もう一度引けます') === -1) {
+      if (articleMeta.textContent.indexOf('????????') === -1) {
         articleMeta.textContent = articleMeta.textContent
-          ? articleMeta.textContent + ' / 記事を読んだので、もう一度引けます。'
-          : '記事を読んだので、もう一度引けます。';
+          ? articleMeta.textContent + ' / ??????????????????'
+          : '??????????????????';
       }
     });
 
@@ -641,34 +670,35 @@
       }
 
       currentState.drawCount += 1;
-      saveDrawState(currentState);
+      currentState = saveDrawState(currentState);
 
       button.disabled = true;
-      button.textContent = '占い中...';
-      status.textContent = '結果を準備しています。';
+      button.textContent = '???...';
+      status.textContent = '???????????';
 
-      window.setTimeout(function () {
-        var fortune = pickFortune(settings.messages, settings.weights, settings);
-        articleRewardGranted = false;
+      ensureMessages().then(function (messages) {
+        window.setTimeout(function () {
+          var fortune = pickFortune(messages, settings.weights, settings);
+          articleRewardGranted = false;
 
-        result.dataset.state = 'drawn';
-        result.dataset.luck = fortune.luck;
-        badge.textContent = fortune.luck;
-        message.textContent = fortune.message;
+          result.dataset.state = 'drawn';
+          result.dataset.luck = fortune.luck;
+          badge.textContent = fortune.luck;
+          message.textContent = fortune.message;
 
-        setImageSource(
-          image,
-          fortune.image,
-          fortune.fallbackImage,
-          fortune.luck + ' の画像',
-          fortune.luck + ' のプレースホルダ画像'
-        );
+          setImageSource(
+            image,
+            fortune.image,
+            fortune.fallbackImage,
+            fortune.luck + ' ???',
+            fortune.luck + ' ??????????'
+          );
 
-        if (!prefetchedArticles && !feedError) {
-          showArticleLoading(articleBox, articleEyebrow, articleLink, articleMeta, articleSummary, settings);
-        }
+          if (!prefetchedArticles && !feedError) {
+            showArticleLoading(articleBox, articleEyebrow, articleLink, articleMeta, articleSummary, settings);
+          }
 
-        ensureFeedItems(!!feedError).then(function (items) {
+          ensureFeedItems().then(function (items) {
           if (items && items.length) {
             renderArticle(
               articleBox,
@@ -677,29 +707,21 @@
               articleMeta,
               articleSummary,
               items[randomInt(items.length)],
-              settings.feedUrl,
               settings
             );
             return;
           }
 
-          renderArticle(articleBox, articleEyebrow, articleLink, articleMeta, articleSummary, null, settings.feedUrl, settings);
-        }).catch(function (error) {
-          if (window.location.protocol === 'file:') {
-            articleBox.dataset.state = 'ready';
-            articleEyebrow.textContent = settings.articleHeading;
-            articleLink.textContent = 'ローカルファイルではRSSを取得できない場合があります';
-            articleLink.href = settings.feedUrl;
-            articleMeta.textContent = 'index.html を file:/// ではなく HTTP サーバー経由で開いてください。';
-            articleSummary.textContent = '例: VS Code Live Server、または python -m http.server など。';
-            return;
-          }
-
-          renderArticle(articleBox, articleEyebrow, articleLink, articleMeta, articleSummary, null, settings.feedUrl, settings);
-        }).finally(function () {
-          updateDrawControls(button, status, settings);
-        });
-      }, 260);
+          currentState = restoreDraw(currentState);
+          renderArticle(articleBox, articleEyebrow, articleLink, articleMeta, articleSummary, null, settings);
+          }).catch(function () {
+            currentState = restoreDraw(currentState);
+            renderArticle(articleBox, articleEyebrow, articleLink, articleMeta, articleSummary, null, settings);
+          }).finally(function () {
+            updateDrawControls(button, status, settings);
+          });
+        }, 260);
+      });
     });
 
     return {
@@ -732,6 +754,8 @@
     autoMount();
   }
 })();
+
+
 
 
 

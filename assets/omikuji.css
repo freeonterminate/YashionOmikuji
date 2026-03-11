@@ -208,6 +208,22 @@
   opacity: 0.65;
 }
 
+.omikuji-widget__footer {
+  margin: 14px 0 0;
+  text-align: center;
+}
+
+.omikuji-widget__footer-link {
+  color: var(--omikuji-accent);
+  text-decoration: none;
+  font-size: 0.92rem;
+}
+
+.omikuji-widget__footer-link:hover,
+.omikuji-widget__footer-link:focus-visible {
+  text-decoration: underline;
+}
+
 .omikuji-widget__result[data-luck="大吉"] {
   border-color: rgba(188, 133, 26, 0.7);
 }
