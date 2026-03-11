@@ -189,38 +189,86 @@
     return [map.year, map.month, map.day].join('-');
   }
 
+  function createEmptyState(today) {
+    return {
+      date: today || getTodayKey(),
+      drawCount: 0,
+      bonusCount: 0,
+      fortune: null,
+      article: null
+    };
+  }
+
+  function normalizeStoredFortune(fortune) {
+    if (!fortune || typeof fortune !== 'object') {
+      return null;
+    }
+
+    if (!fortune.luck || !fortune.message) {
+      return null;
+    }
+
+    return {
+      luck: String(fortune.luck),
+      message: String(fortune.message),
+      image: fortune.image ? String(fortune.image) : '',
+      fallbackImage: fortune.fallbackImage ? String(fortune.fallbackImage) : createFortunePlaceholderSvg(String(fortune.luck))
+    };
+  }
+
+  function normalizeStoredArticle(article) {
+    if (!article || typeof article !== 'object') {
+      return null;
+    }
+
+    if (!article.title || !article.link) {
+      return null;
+    }
+
+    return {
+      title: String(article.title),
+      link: String(article.link),
+      pubDate: article.pubDate ? String(article.pubDate) : '',
+      description: article.description ? String(article.description) : ''
+    };
+  }
+
   function parseStoredState(rawValue) {
     var today = getTodayKey();
     if (!rawValue) {
-      return {
-        date: today,
-        drawCount: 0,
-        bonusCount: 0
-      };
+      return createEmptyState(today);
     }
 
     try {
       var parsed = JSON.parse(rawValue);
       if (!parsed || parsed.date !== today) {
-        return {
-          date: today,
-          drawCount: 0,
-          bonusCount: 0
-        };
+        return createEmptyState(today);
       }
 
       return {
         date: today,
         drawCount: Math.max(0, Number(parsed.drawCount) || 0),
-        bonusCount: Math.max(0, Number(parsed.bonusCount) || 0)
+        bonusCount: Math.max(0, Number(parsed.bonusCount) || 0),
+        fortune: normalizeStoredFortune(parsed.fortune),
+        article: normalizeStoredArticle(parsed.article)
       };
     } catch (error) {
-      return {
-        date: today,
-        drawCount: 0,
-        bonusCount: 0
-      };
+      return createEmptyState(today);
     }
+  }
+
+  function storeDisplayedResult(state, fortune, article) {
+    var nextState = state || loadDrawState();
+    nextState.fortune = normalizeStoredFortune(fortune);
+    nextState.article = normalizeStoredArticle(article);
+    return saveDrawState(nextState);
+  }
+
+  function clearDisplayedResult(state) {
+    var nextState = state || loadDrawState();
+    nextState.fortune = null;
+    nextState.article = null;
+    return saveDrawState(nextState);
   }
 
   function readCookie(name) {
@@ -629,7 +677,7 @@
       return null;
     });
 
-    renderInitialState(result, badge, image, message, articleBox, articleEyebrow, articleLink, articleMeta, articleSummary, settings);
+    restoreSavedDisplay(loadDrawState(), result, badge, image, message, articleBox, articleEyebrow, articleLink, articleMeta, articleSummary, settings);
 
     if (debugEnabled) {
       debugResetButton.hidden = false;
@@ -700,21 +748,25 @@
 
           ensureFeedItems().then(function (items) {
           if (items && items.length) {
+            var article = items[randomInt(items.length)];
             renderArticle(
               articleBox,
               articleEyebrow,
               articleLink,
               articleMeta,
               articleSummary,
-              items[randomInt(items.length)],
+              article,
               settings
             );
+            currentState = storeDisplayedResult(currentState, fortune, article);
             return;
           }
 
+          currentState = clearDisplayedResult(currentState);
           currentState = restoreDraw(currentState);
           renderArticle(articleBox, articleEyebrow, articleLink, articleMeta, articleSummary, null, settings);
           }).catch(function () {
+            currentState = clearDisplayedResult(currentState);
             currentState = restoreDraw(currentState);
             renderArticle(articleBox, articleEyebrow, articleLink, articleMeta, articleSummary, null, settings);
           }).finally(function () {
