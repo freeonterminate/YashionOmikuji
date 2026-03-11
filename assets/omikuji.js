@@ -80,7 +80,6 @@
 
   var STORAGE_KEY = 'omikujiWidgetState';
   var COOKIE_KEY = 'omikujiWidgetState';
-  var feedCache = {};
 
   function createPlaceholderSvg(label, pair) {
     var colors = pair || ["#f2eadb", "#8f281f"];
@@ -341,64 +340,25 @@
     }
   }
 
-  function isSameOriginUrl(url) {
-    try {
-      return new URL(url).origin === window.location.origin;
-    } catch (error) {
-      return false;
+  function getDefaultFeedUrl() {
+    if (window.location.hostname === 'yashion.jp' || /\\.yashion\\.jp$/i.test(window.location.hostname)) {
+      return '/feed/';
     }
+
+    return 'https://yashion.jp/feed/';
   }
 
-  function fetchTextWithTimeout(url, timeoutMs) {
-    var controller = typeof AbortController === 'function' ? new AbortController() : null;
-    var timeoutId = window.setTimeout(function () {
-      if (controller) {
-        controller.abort();
-      }
-    }, timeoutMs);
-
+  function fetchFeedText(url) {
     return fetch(url, {
       cache: 'no-store',
-      signal: controller ? controller.signal : undefined
+      mode: 'cors'
     }).then(function (response) {
       if (!response.ok) {
         throw new Error('http_' + response.status);
       }
 
       return response.text();
-    }).finally(function () {
-      window.clearTimeout(timeoutId);
     });
-  }
-
-  function firstSuccessful(requests) {
-    return new Promise(function (resolve, reject) {
-      var errors = [];
-      var settledCount = 0;
-
-      for (var i = 0; i < requests.length; i += 1) {
-        requests[i].then(resolve).catch(function (error) {
-          errors.push(error);
-          settledCount += 1;
-          if (settledCount === requests.length) {
-            reject(errors[0] || new Error('feed_unavailable'));
-          }
-        });
-      }
-    });
-  }
-
-  function fetchFeedText(feedUrl) {
-    var resolvedFeedUrl = resolveFeedUrl(feedUrl);
-
-    if (isSameOriginUrl(resolvedFeedUrl)) {
-      return fetchTextWithTimeout(resolvedFeedUrl, 4000);
-    }
-
-    return firstSuccessful([
-      fetchTextWithTimeout('https://api.allorigins.win/raw?url=' + encodeURIComponent(resolvedFeedUrl), 5000),
-      fetchTextWithTimeout(resolvedFeedUrl, 2500)
-    ]);
   }
 
   function parseFeedItems(xmlText, feedUrl) {
@@ -429,53 +389,13 @@
     });
   }
 
-  function getFeedState(feedUrl) {
-    return feedCache[feedUrl] || null;
-  }
-
-  function getFeedItems(feedUrl) {
-    var state = feedCache[feedUrl];
-    if (!state) {
-      state = {
-        status: 'pending',
-        items: null,
-        promise: null
-      };
-
-      state.promise = fetchFeedText(feedUrl).then(function (xmlText) {
-        var items = parseFeedItems(xmlText, feedUrl);
-        if (!items.length) {
-          throw new Error('empty_feed');
-        }
-
-        state.status = 'resolved';
-        state.items = items;
-        return items;
-      }).catch(function (error) {
-        delete feedCache[feedUrl];
-        throw error;
-      });
-
-      feedCache[feedUrl] = state;
-    }
-
-    return state.promise;
-  }
-
-  function prefetchFeed(feedUrl) {
-    return getFeedItems(feedUrl).catch(function () {
-      return null;
-    });
-  }
-
-  function pickRandomArticle(feedUrl) {
-    var state = getFeedState(feedUrl);
-    if (state && state.status === 'resolved' && state.items && state.items.length) {
-      return Promise.resolve(state.items[randomInt(state.items.length)]);
-    }
-
-    return getFeedItems(feedUrl).then(function (items) {
-      return items[randomInt(items.length)];
+  function fetchRemoteFeedItems(feedUrl) {
+    return fetchFeedText(resolveFeedUrl(feedUrl)).then(function (xmlText) {
+      var items = parseFeedItems(xmlText, feedUrl);
+      if (!items.length) {
+        throw new Error('empty_feed');
+      }
+      return items;
     });
   }
 
@@ -533,7 +453,7 @@
       preArticleHeading: (options && options.preArticleHeading) || 'おみくじを引くと開運記事が読めるよ',
       preArticleSummary: (options && options.preArticleSummary) || '',
       debug: !!(options && options.debug),
-      feedUrl: (options && options.feedUrl) || 'https://yashion.jp/feed/',
+      feedUrl: (options && options.feedUrl) || getDefaultFeedUrl(),
       noticeLine1: (options && options.noticeLine1) || 'おみくじは一日一回ひけるよ！',
       noticeLine2: (options && options.noticeLine2) || '…本当はヒミツなんだけど、開運記事を読むとまた引けるよ！',
       messages: (options && options.messages) || DEFAULT_MESSAGES,
@@ -569,11 +489,6 @@
     articleLink.href = article.link;
     articleMeta.textContent = formatArticleDate(article.pubDate);
     articleSummary.textContent = article.description || '気になる記事を開いてチェックしてみてください。';
-  }
-
-  function scheduleFeedPrefetch(feedUrl) {
-    // Start immediately so the article is usually ready by the time the user draws.
-    prefetchFeed(feedUrl);
   }
 
   function isDebugEnabled(root, options) {
@@ -636,7 +551,6 @@
     }
 
     var settings = normalizeOptions(options);
-    scheduleFeedPrefetch(settings.feedUrl);
     root.classList.add('omikuji-widget');
     root.innerHTML = createMarkup(settings);
 
@@ -654,16 +568,42 @@
     var articleSummary = root.querySelector('.omikuji-widget__article-summary');
     var articleRewardGranted = false;
     var debugEnabled = isDebugEnabled(root, settings);
+    var prefetchedArticles = null;
+    var feedError = null;
+    var feedRequest = null;
+
+    function ensureFeedItems(forceRetry) {
+      if (prefetchedArticles && !forceRetry) {
+        return Promise.resolve(prefetchedArticles);
+      }
+
+      if (feedRequest && !forceRetry) {
+        return feedRequest;
+      }
+
+      feedError = null;
+      feedRequest = fetchRemoteFeedItems(settings.feedUrl).then(function (items) {
+        prefetchedArticles = items;
+        return items;
+      }).catch(function (error) {
+        feedError = error;
+        if (window.console && typeof window.console.warn === 'function') {
+          window.console.warn('[OmikujiWidget] RSS fetch failed:', error);
+        }
+        throw error;
+      });
+
+      return feedRequest;
+    }
+
+    ensureFeedItems(false).catch(function () {
+      return null;
+    });
 
     renderInitialState(result, badge, image, message, articleBox, articleEyebrow, articleLink, articleMeta, articleSummary, settings);
 
     if (debugEnabled) {
       debugResetButton.hidden = false;
-    }
-
-    updateDrawControls(button, status, settings);
-
-    if (debugEnabled) {
       debugResetButton.addEventListener('click', function () {
         clearDrawState();
         articleRewardGranted = false;
@@ -671,6 +611,8 @@
         updateDrawControls(button, status, settings);
       });
     }
+
+    updateDrawControls(button, status, settings);
 
     articleLink.addEventListener('click', function () {
       var href = articleLink.getAttribute('href');
@@ -690,7 +632,6 @@
           : '記事を読んだので、もう一度引けます。';
       }
     });
-
 
     button.addEventListener('click', function () {
       var currentState = loadDrawState();
@@ -723,14 +664,37 @@
           fortune.luck + ' のプレースホルダ画像'
         );
 
-        var feedState = getFeedState(settings.feedUrl);
-        if (!(feedState && feedState.status === 'resolved')) {
+        if (!prefetchedArticles && !feedError) {
           showArticleLoading(articleBox, articleEyebrow, articleLink, articleMeta, articleSummary, settings);
         }
 
-        pickRandomArticle(settings.feedUrl).then(function (article) {
-          renderArticle(articleBox, articleEyebrow, articleLink, articleMeta, articleSummary, article, settings.feedUrl, settings);
-        }).catch(function () {
+        ensureFeedItems(!!feedError).then(function (items) {
+          if (items && items.length) {
+            renderArticle(
+              articleBox,
+              articleEyebrow,
+              articleLink,
+              articleMeta,
+              articleSummary,
+              items[randomInt(items.length)],
+              settings.feedUrl,
+              settings
+            );
+            return;
+          }
+
+          renderArticle(articleBox, articleEyebrow, articleLink, articleMeta, articleSummary, null, settings.feedUrl, settings);
+        }).catch(function (error) {
+          if (window.location.protocol === 'file:') {
+            articleBox.dataset.state = 'ready';
+            articleEyebrow.textContent = settings.articleHeading;
+            articleLink.textContent = 'ローカルファイルではRSSを取得できない場合があります';
+            articleLink.href = settings.feedUrl;
+            articleMeta.textContent = 'index.html を file:/// ではなく HTTP サーバー経由で開いてください。';
+            articleSummary.textContent = '例: VS Code Live Server、または python -m http.server など。';
+            return;
+          }
+
           renderArticle(articleBox, articleEyebrow, articleLink, articleMeta, articleSummary, null, settings.feedUrl, settings);
         }).finally(function () {
           updateDrawControls(button, status, settings);
@@ -768,12 +732,6 @@
     autoMount();
   }
 })();
-
-
-
-
-
-
 
 
 
