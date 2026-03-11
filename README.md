@@ -20,6 +20,19 @@
 <script src="assets/omikuji.js"></script>
 ```
 
+## PNG の置き方
+
+デフォルトでは `assets/omikuji-images` フォルダを見に行きます。
+以下の5ファイル名で PNG を置くと、結果に応じて自動表示されます。日本語ファイル名は使いません。
+
+- `daikichi.png`
+- `chukichi.png`
+- `kichi.png`
+- `kyo.png`
+- `daikyo.png`
+
+ファイルが見つからない場合は、プレースホルダ画像を表示します。
+
 ## カスタマイズ
 
 見出し文言の変更:
@@ -35,22 +48,17 @@
 </script>
 ```
 
-画像の差し替え:
+画像フォルダを変える場合:
 
 ```html
 <script>
   OmikujiWidget.mount("#fortune-box", {
-    images: {
-      大吉: "./images/daikichi.jpg",
-      中吉: "./images/chukichi.jpg",
-      吉: "./images/kichi.jpg",
-      凶: "./images/kyo.jpg",
-      大凶: "./images/daikyo.jpg"
-    }
+    imageDirectory: "./images/fortune"
   });
 </script>
 ```
 
+この場合もファイル名は `daikichi.png` などの英語名で判定します。
+
 結果は `大吉 / 中吉 / 吉 / 凶 / 大凶` の5種類です。文言は各10件、合計50件を内蔵しています。
 
-画像は現時点では SVG のプレースホルダを自動生成しています。画像を細かく出し分けたい場合は `imageResolver(luck)` オプションも使えます。

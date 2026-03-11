@@ -70,6 +70,14 @@
     { luck: "大凶", weight: 10 }
   ];
 
+  var LUCK_IMAGE_NAMES = {
+    "大吉": "daikichi",
+    "中吉": "chukichi",
+    "吉": "kichi",
+    "凶": "kyo",
+    "大凶": "daikyo"
+  };
+
   function createPlaceholderSvg(luck) {
     var colors = {
       "大吉": ["#fff0c2", "#d19a21"],
@@ -116,6 +124,19 @@
     return weights[weights.length - 1].luck;
   }
 
+  function normalizeDirectory(path) {
+    if (!path) {
+      return './assets/omikuji-images';
+    }
+
+    return path.replace(/[\\/]+$/, '');
+  }
+
+  function buildImagePath(luck, options) {
+    var filename = LUCK_IMAGE_NAMES[luck] || 'placeholder';
+    return normalizeDirectory(options.imageDirectory) + '/' + filename + '.png';
+  }
+
   function resolveImage(luck, options) {
     if (options.imageResolver) {
       var resolved = options.imageResolver(luck);
@@ -128,7 +149,7 @@
       return options.images[luck];
     }
 
-    return createPlaceholderSvg(luck);
+    return buildImagePath(luck, options);
   }
 
   function pickFortune(messages, weights, options) {
@@ -139,7 +160,8 @@
     return {
       luck: luck,
       message: message,
-      image: resolveImage(luck, options)
+      image: resolveImage(luck, options),
+      fallbackImage: createPlaceholderSvg(luck)
     };
   }
 
@@ -173,11 +195,12 @@
       title: (options && options.title) || 'おみくじ',
       description: (options && options.description) || 'ボタンを押して今日の運勢を占ってみましょう。',
       buttonLabel: (options && options.buttonLabel) || 'おみくじを引く',
-      hint: (options && options.hint) || '画像は今後差し替えできるプレースホルダです。',
+      hint: (options && options.hint) || '画像は assets/omikuji-images に英語名の PNG を置くと自動で差し替わります。',
       messages: (options && options.messages) || DEFAULT_MESSAGES,
       weights: (options && options.weights) || DEFAULT_WEIGHTS,
       images: (options && options.images) || null,
-      imageResolver: (options && options.imageResolver) || null
+      imageResolver: (options && options.imageResolver) || null,
+      imageDirectory: (options && options.imageDirectory) || './assets/omikuji-images'
     };
   }
 
@@ -207,9 +230,23 @@
         result.hidden = false;
         result.dataset.luck = fortune.luck;
         badge.textContent = fortune.luck;
+        message.textContent = fortune.message;
+
+        image.dataset.fallbackApplied = 'false';
+        image.onerror = function () {
+          if (image.dataset.fallbackApplied === 'true') {
+            return;
+          }
+
+          image.dataset.fallbackApplied = 'true';
+          image.src = fortune.fallbackImage;
+          image.alt = fortune.luck + ' のプレースホルダ画像';
+        };
+        image.onload = function () {
+          image.dataset.fallbackApplied = 'false';
+        };
         image.src = fortune.image;
         image.alt = fortune.luck + ' の画像';
-        message.textContent = fortune.message;
 
         button.disabled = false;
         button.textContent = settings.buttonLabel;
@@ -245,3 +282,4 @@
     autoMount();
   }
 })();
+
