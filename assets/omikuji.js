@@ -743,7 +743,8 @@
 
   window.OmikujiWidget = {
     mount: mount,
-    messages: DEFAULT_MESSAGES,
+    fallbackMessages: FALLBACK_MESSAGES,
+    parseMessagesText: parseMessagesText,
     createFortunePlaceholderSvg: createFortunePlaceholderSvg,
     createTitlePlaceholderSvg: createTitlePlaceholderSvg
   };
