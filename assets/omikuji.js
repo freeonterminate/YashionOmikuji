@@ -449,7 +449,7 @@
       preArticleHeading: (options && options.preArticleHeading) || 'おみくじを引くと開運記事が読めるよ',
       preArticleSummary: (options && options.preArticleSummary) || '',
       debug: !!(options && options.debug),
-      feedUrl: (options && options.feedUrl) || 'https://yashion.jp/feed/',
+      feedUrl: (options && options.feedUrl) || 'https://al3-q10d3e.yashion.jp/feed/',
       noticeLine1: (options && options.noticeLine1) || 'おみくじは一日一回ひけるよ！',
       noticeLine2: (options && options.noticeLine2) || '…本当はヒミツなんだけど、開運記事を読むとまた引けるよ！',
       messages: (options && options.messages) || null,
