@@ -596,6 +596,7 @@
     var remaining = getRemainingDraws(state);
 
     if (remaining > 0) {
+      button.dataset.locked = 'false';
       button.disabled = false;
       button.textContent = options.buttonLabel;
       if (state.drawCount === 0) {
@@ -607,7 +608,7 @@
       }
       return state;
     }
-
+    button.dataset.locked = 'true';
     button.disabled = true;
     button.textContent = options.lockedButtonLabel;
     status.textContent = '今日は一度引きました。表示された開運記事を読むと、また引けます。';
