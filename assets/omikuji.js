@@ -216,18 +216,36 @@
     };
   }
 
+  function sanitizeHttpUrl(url) {
+    if (!url) {
+      return '';
+    }
+
+    try {
+      var parsed = new URL(String(url), window.location.href);
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        return '';
+      }
+
+      return parsed.href;
+    } catch (error) {
+      return '';
+    }
+  }
+
   function normalizeStoredArticle(article) {
     if (!article || typeof article !== 'object') {
       return null;
     }
 
-    if (!article.title || !article.link) {
+    var safeLink = sanitizeHttpUrl(article.link);
+    if (!article.title || !safeLink) {
       return null;
     }
 
     return {
       title: String(article.title),
-      link: String(article.link),
+      link: safeLink,
       pubDate: article.pubDate ? String(article.pubDate) : '',
       description: article.description ? String(article.description) : ''
     };
@@ -313,7 +331,11 @@
       // Ignore localStorage failures and rely on cookies when possible.
     }
 
-    document.cookie = COOKIE_KEY + '=' + encodeURIComponent(rawValue) + '; path=/; max-age=604800; samesite=lax';
+    var cookie = COOKIE_KEY + '=' + encodeURIComponent(rawValue) + '; path=/; max-age=604800; samesite=lax';
+    if (window.location.protocol === 'https:') {
+      cookie += '; secure';
+    }
+    document.cookie = cookie;
     return safeState;
   }
 
@@ -423,7 +445,7 @@
 
       return {
         title: title || 'やしおんの記事',
-        link: link || feedUrl,
+        link: sanitizeHttpUrl(link || feedUrl),
         pubDate: pubDateNode ? pubDateNode.textContent.trim() : '',
         description: description
       };
